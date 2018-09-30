@@ -1,0 +1,5 @@
+.vs/
+FlubuCore.Azure.Tests/bin/
+FlubuCore.Azure.Tests/obj/
+FlubuCore.Azure/obj/
+FlubuCore.Azure/bin/
