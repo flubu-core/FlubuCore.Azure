@@ -1,11 +1,25 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>net462</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="FlubuCore" Version="2.12.0" />
+    <PackageReference Include="Scripty.MsBuild" Version="0.7.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="YamlDotNet" Version="5.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="FlubuCore.TaskGenerator">
+      <HintPath>..\Lib\FlubuCore.TaskGenerator.dll</HintPath>
+    </Reference>
+    <Reference Include="Scripty.Core">
+      <HintPath>C:\Users\markoz\.nuget\packages\scripty.core\0.7.4\lib\net46\Scripty.Core.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
