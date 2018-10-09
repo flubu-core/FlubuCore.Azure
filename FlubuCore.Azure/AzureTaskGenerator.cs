@@ -19,7 +19,9 @@ namespace FlubuCore.Azure
                 return string.Empty;
             }
 
-            return $"{parameter.ParameterType} {parameter.ParameterName} = null";
+            string parameterName = ParameterName(parameter.ParameterName);
+
+            return $"{parameter.ParameterType} {parameterName} = null";
         }
 
         protected override string WriteArgument(Argument argument)
@@ -34,10 +36,12 @@ namespace FlubuCore.Azure
                 return $@"WithArguments(""{argument.ArgumentKey}"");";
             }
 
+            var parameterName = ParameterName(argument.Parameter.ParameterName);
+
             return $@"WithArguments(""{argument.ArgumentKey}"");
-            if (!string.IsNullOrEmpty({argument.Parameter.ParameterName}))
+            if (!string.IsNullOrEmpty({parameterName}))
             {{
-                 WithArguments({argument.Parameter.ParameterName});
+                 WithArguments({parameterName});
             }}
 ";
         }
