@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using FlubuCore.Azure;
 using FlubuCore.Azure.Models;
@@ -13,63 +14,86 @@ namespace FlubuCore.Azure
 {
     public class AzureParser
     {
-        public List<Task> Parse()
+        private static char[] digits = new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+
+        public List<Task> Parse(List<Models.Azure> azures)
         {
-            WebClient client = new WebClient();
-            var response = client.DownloadString("https://raw.githubusercontent.com/Azure/azure-docs-cli-python/9113bf87/latest/docs-ref-autogen/reference-index.yml");
-            var deserializer = new YamlDotNet.Serialization.Deserializer();
-            object yamlObject = deserializer.Deserialize<object>(response);
-
-            Newtonsoft.Json.JsonSerializer js = new Newtonsoft.Json.JsonSerializer();
-
-            var w = new System.IO.StringWriter();
-            js.Serialize(w, yamlObject);
-            string jsonText = w.ToString();
-
-            var azure = JsonConvert.DeserializeObject<FlubuCore.Azure.Models.Azure>(jsonText);
             var tasks = new List<TaskGenerator.Models.Task>();
-            foreach (var item in azure.Items)
+
+            foreach (Models.Azure azure in azures)
             {
-                TaskGenerator.Models.Task task = new TaskGenerator.Models.Task()
+                foreach (var item in azure.Items)
                 {
-                    Namespace = "FlubuCore.Azure",
-                    ProjectName = "FlubuCore.Azure",
-                    Methods = new List<Method>(),
-                };
-
-                var splitedName = item.Name.Split(' ');
-                if (splitedName.Length == 1)
-                {
-                    continue;
-                }
-
-                task.TaskName = $"Azure{splitedName[1].FirstCharToUpper()}Task";
-                task.FileName = $"{task.TaskName}.cs";
-                
-                task.Constructor = new Constructor
-                {
-                    Summary = item.Summary,
-                    Arguments = new List<Argument>(),
-                };
-
-                task.Constructor.Arguments.Add(new Argument
-                {
-                    ArgumentKey = item.Name,
-                });
-
-                foreach (var parameter in item.Parameters)
-                {
-                    if (parameter.IsRequired.HasValue && parameter.IsRequired.Value)
+                    var splitedName = item.Name.Split(' ', '-').ToList();
+                    if (splitedName.Count == 1 || splitedName.Contains("List"))
                     {
-                        AddArgumentToConstructor(task, parameter);
+                        continue;
                     }
 
-                    AddNewMethod(task, parameter);
-                }
+                    splitedName.RemoveAt(0);
 
-                tasks.Add(task);
+                    splitedName = splitedName.Select(x => x.FirstCharToUpper()).ToList();
+                    
+                    TaskGenerator.Models.Task task = new TaskGenerator.Models.Task()
+                    {
+                        Namespace = "FlubuCore.Azure.Tasks",
+                        ProjectName = "FlubuCore.Azure",
+                        Methods = new List<Method>(),
+                    };
+
+                    task.TaskName = $"Azure{string.Join(string.Empty, splitedName)}Task";
+
+                    string fileName;
+                    if (splitedName.Count > 1)
+                    {
+                        task.Namespace = $"{task.Namespace}.{splitedName[0]}";
+                        fileName = $"Tasks\\{splitedName[0]}\\{task.TaskName}.cs";
+                    }
+                    else
+                    {
+                        fileName = $"Tasks\\{task.TaskName}.cs";
+                    }
+                    
+                    task.FileName = fileName;
+
+                    task.Constructor = new Constructor
+                    {
+                        Summary = item.Summary,
+                        Arguments = new List<Argument>(),
+                    };
+
+                    task.Constructor.Arguments.Add(new Argument
+                    {
+                        ArgumentKey = item.Name,
+                    });
+
+                    if (item.Parameters != null)
+                    {
+                        foreach (var parameter in item.Parameters)
+                        {
+                            if (parameter.Name.Equals("--description", StringComparison.OrdinalIgnoreCase) || parameter.Name.Equals("--404description", StringComparison.OrdinalIgnoreCase))
+                            {
+                                continue;
+                            }
+
+                            if (parameter.IsRequired.HasValue && parameter.IsRequired.Value)
+                            {
+                                AddArgumentToConstructor(task, parameter);
+                            }
+
+                            if (!parameter.Name.StartsWith("<"))
+                            {
+                                AddNewMethod(task, parameter);
+                            }
+                        }
+                    }
+
+                    tasks.Add(task);
+                }
             }
 
+            tasks.RemoveAll(x => x.TaskName.Contains("List"));
+            tasks = tasks.DistinctBy(x => x.TaskName).ToList();
             return tasks;
         }
 
@@ -113,7 +137,7 @@ namespace FlubuCore.Azure
         public string ParseParameterName(string value)
         {
             var splitedValues = value.Split(' ');
-            var names = splitedValues[0].TrimStart('-').Split('-');
+            var names = splitedValues[0].TrimStart('-').TrimStart(digits).Split('-');
             string name = null;
             for (var i = 0; i < names.Length; i++)
             {
@@ -126,9 +150,9 @@ namespace FlubuCore.Azure
         public string ParseMethodName(string value)
         {
             var splitedValues = value.Split(' ');
-            var names = splitedValues[0].TrimStart('-').Split('-');
+            var names = splitedValues[0].TrimStart('-').TrimStart(digits).Split('-').Where(x => !string.IsNullOrEmpty(x)).ToList();
             string name = null;
-            for (var i = 0; i < names.Length; i++)
+            for (var i = 0; i < names.Count; i++)
             {
                 name = $"{name}{names[i].FirstCharToUpper()}";
             }
