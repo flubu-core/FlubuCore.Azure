@@ -7,10 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FlubuCore" Version="2.12.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="NJsonSchema.CodeGeneration.CSharp" Version="9.11.0" />
-    <PackageReference Include="NJsonSchema.Yaml" Version="9.11.0" />
     <PackageReference Include="Scripty.MsBuild" Version="0.7.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
@@ -18,10 +17,6 @@
     <PackageReference Include="xunit" Version="2.3.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
     <PackageReference Include="YamlDotNet" Version="5.2.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\FlubuCore.Azure\FlubuCore.Azure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
