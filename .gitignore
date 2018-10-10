@@ -9,3 +9,5 @@ FlubuCore.Azure.Generator/obj/
 FlubuCore.Azure.Generator/bin/
 FlubuCore.Azure.Generator.Tests/obj/
 FlubuCore.Azure.Generator.Tests/docs/
+bin/
+BuildScript/obj/
