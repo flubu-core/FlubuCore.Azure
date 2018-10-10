@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using FlubuCore.Context.FluentInterface.Interfaces;
 
-namespace FlubuCore.Azure
+// ReSharper disable once CheckNamespace
+namespace FlubuCore.Context
 {
     public static class AzureExtension
     {
@@ -12,9 +13,9 @@ namespace FlubuCore.Azure
         /// </summary>
         /// <param name="flubu"></param>
         /// <returns></returns>
-        public static Azure Azure(this ITaskFluentInterface flubu)
+        public static Azure.Azure Azure(this ITaskFluentInterface flubu)
         {
-            return new Azure();
+            return new Azure.Azure();
         }
     }
 }
