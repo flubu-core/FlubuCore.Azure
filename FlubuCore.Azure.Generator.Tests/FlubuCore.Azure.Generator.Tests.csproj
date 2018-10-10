@@ -21,6 +21,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FlubuCore.Azure\FlubuCore.Azure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="FlubuCore.TaskGenerator">
       <HintPath>FlubuCore.TaskGenerator.dll</HintPath>
     </Reference>

@@ -4,3 +4,8 @@ FlubuCore.Azure.Tests/obj/
 FlubuCore.Azure/obj/
 FlubuCore.Azure/bin/
 *.tmp
+FlubuCore.Azure.Generator.Tests/bin/
+FlubuCore.Azure.Generator/obj/
+FlubuCore.Azure.Generator/bin/
+FlubuCore.Azure.Generator.Tests/obj/
+FlubuCore.Azure.Generator.Tests/docs/
