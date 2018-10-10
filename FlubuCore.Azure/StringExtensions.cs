@@ -17,8 +17,7 @@ namespace FlubuCore.Azure
             }
         }
 
-        public static IEnumerable<TSource> DistinctBy<TSource, TKey>
-            (this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
+        public static IEnumerable<TSource> DistinctBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
         {
             HashSet<TKey> seenKeys = new HashSet<TKey>();
             foreach (TSource element in source)
@@ -28,6 +27,34 @@ namespace FlubuCore.Azure
                     yield return element;
                 }
             }
+        }
+
+        public static string RemoveFromEnd(this string s, string suffix)
+        {
+            if (s.EndsWith(suffix))
+            {
+                return s.Substring(0, s.Length - suffix.Length);
+            }
+            else
+            {
+                return s;
+            }
+        }
+
+        public static string RemoveFromBeginning(this string target, string trimString)
+        {
+            if (string.IsNullOrEmpty(trimString))
+            {
+                return target;
+            }
+
+            string result = target;
+            while (result.StartsWith(trimString))
+            {
+                result = result.Substring(trimString.Length);
+            }
+
+            return result;
         }
     }
 }

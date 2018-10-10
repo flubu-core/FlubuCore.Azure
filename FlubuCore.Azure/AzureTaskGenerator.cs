@@ -11,7 +11,7 @@ namespace FlubuCore.Azure
         public AzureTaskGenerator(ScriptContext context) : base(context)
         {
         }
-        
+
         protected override string WriteParameter(Parameter parameter)
         {
             if (parameter == null)

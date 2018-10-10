@@ -16,6 +16,56 @@ namespace FlubuCore.Azure
     {
         private static char[] digits = new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
+        public TaskExtensions ToTaskExtensions(List<Task> tasks)
+        {
+            var taskExtensions = new TaskExtensions();
+            taskExtensions.ExtensionName = "Azure";
+            taskExtensions.FileName = "Azure.cs";
+            taskExtensions.Namespace = "FlubuCore.Azure";
+            foreach (var task in tasks)
+            {
+                if (string.IsNullOrEmpty(task.Parent))
+                {
+                    taskExtensions.Methods.Add(MapToExtensionMethod(task));
+                }
+                else
+                {
+                    var subExtension = taskExtensions.SubExtensions.FirstOrDefault(x => x.ExtensionName == task.Parent);
+                    if (subExtension != null)
+                    {
+                        subExtension.Methods.Add(MapToExtensionMethod(task));
+                    }
+                    else
+                    {
+                        subExtension = new TaskExtensions
+                        {
+                            ExtensionName = task.Parent,
+                            FileName = $"{task.Parent}.cs",
+                            Namespace = "FlubuCore.Azure",
+                        };
+
+                        subExtension.Usings.Add($"FlubuCore.Azure.Tasks.{task.Parent}");
+                        subExtension.Methods.Add(MapToExtensionMethod(task));
+                        taskExtensions.SubExtensions.Add(subExtension);
+                    }
+                }
+            }
+
+            taskExtensions.Methods = taskExtensions.Methods.Where(x => !taskExtensions.SubExtensions.Any(y => y.ExtensionName == x.MethodName)).ToList();
+
+            return taskExtensions;
+        }
+
+        private static ExtensionMethod MapToExtensionMethod(Task task)
+        {
+            return new ExtensionMethod
+            {
+                TaskName = task.TaskName,
+                MethodName = task.TaskName.RemoveFromBeginning("Azure").RemoveFromEnd("Task"),
+                Parameters = task.Constructor.Arguments?.Select(x => x.Parameter).Where(x => x != null).ToList(),
+            };
+        }
+
         public List<Task> Parse(List<Models.Azure> azures)
         {
             var tasks = new List<TaskGenerator.Models.Task>();
@@ -48,12 +98,13 @@ namespace FlubuCore.Azure
                     {
                         task.Namespace = $"{task.Namespace}.{splitedName[0]}";
                         fileName = $"Tasks\\{splitedName[0]}\\{task.TaskName}.cs";
+                        task.Parent = splitedName[0];
                     }
                     else
                     {
                         fileName = $"Tasks\\{task.TaskName}.cs";
                     }
-                    
+
                     task.FileName = fileName;
 
                     task.Constructor = new Constructor
@@ -71,7 +122,7 @@ namespace FlubuCore.Azure
                     {
                         foreach (var parameter in item.Parameters)
                         {
-                            if (parameter.Name.Equals("--description", StringComparison.OrdinalIgnoreCase) || parameter.Name.Equals("--404description", StringComparison.OrdinalIgnoreCase))
+                            if (parameter.Name.Equals("--description", StringComparison.OrdinalIgnoreCase) || parameter.Name.Equals("--404-description", StringComparison.OrdinalIgnoreCase))
                             {
                                 continue;
                             }
@@ -92,7 +143,7 @@ namespace FlubuCore.Azure
                 }
             }
 
-            tasks.RemoveAll(x => x.TaskName.Contains("List"));
+            tasks.RemoveAll(x => x.TaskName.Contains("List") || x.TaskName.Contains("Show"));
             tasks = tasks.DistinctBy(x => x.TaskName).ToList();
             return tasks;
         }

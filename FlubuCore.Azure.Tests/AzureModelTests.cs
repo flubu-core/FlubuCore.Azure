@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using FlubuCore.Azure.Models;
-using FlubuCore.TaskGenerator.Models;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Newtonsoft.Json;
 using NJsonSchema;
